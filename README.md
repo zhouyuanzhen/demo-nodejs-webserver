@@ -82,4 +82,52 @@ service "websrv-demo" deleted
 deployment.apps "websrv-deploy" deleted
 ```
 
+## Manual Way
+
+```shell
+echo "Run docker image in K8S"
+$ kubectl run --image=demo-node-webserver:1.0 demo-webserver
+
+echo "Check the K8S pods"
+$ kubectl get pods
+NAME                              READY   STATUS    RESTARTS   AGE
+demo-webserver-7dd7d44b44-qlrlw   1/1     Running   0          45s
+
+echo "Forward Port"
+$ kubectl port-forward demo-webserver-7dd7d44b44-qlrlw 18888:8888
+Forwarding from 127.0.0.1:18888 -> 8888
+Forwarding from [::1]:18888 -> 8888
+
+echo "Check our service"
+$ curl -L http://localhost:18888
+<h1>Hello World</h1><p>This is a web server demo application, enjoy yourself ;)</p>
+
+# OR ...
+$ open http://localhost:18888 -a safari
+
+echo "Expose"
+$ kubectl expose deployment.apps/demo-webserver --port 8888 --type=NodePort
+service/demo-webserver exposed
+
+echo "Check the expose port"
+$ kubectl get services
+NAME             TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)          AGE
+demo-webserver   NodePort    10.99.7.33   <none>        8888:30270/TCP   29s
+kubernetes       ClusterIP   10.96.0.1    <none>        443/TCP          174m
+
+echo "Check with our exposec service"
+$ curl -L http://localhost:30270
+$ open http://localhost:30270 -a safari
+
+echo "Cleanup"
+$ kubectl delete service/demo-webserver
+
+echo "Double check"
+$ kubectl get all
+NAME                 TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+service/kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   179m
+
+```
+
+
 **Enjoy!**
